@@ -1,6 +1,6 @@
+import csv
 from Song import Song
 from Playlist import Playlist
-import csv
 
 
 def read(path):
