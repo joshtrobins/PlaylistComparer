@@ -32,7 +32,7 @@ def compare(path, old_playlists, new_playlists):
         file.write("\r\n")
 
         for new_playlist in new_playlists:
-            file.write(new_playlist.name + "\r\n")
+            file.write("\t" + new_playlist.name + "\r\n")
             file.write("\r\n")
             for old_playlist in old_playlists:
                 if new_playlist.name == old_playlist.name:
@@ -42,7 +42,7 @@ def compare(path, old_playlists, new_playlists):
                                (new_song.title == old_song.title and new_song.artist == old_song.artist):
                                 break
                         else:
-                            file.write("\t- "
+                            file.write("\t\t- "
                                        + old_song.title
                                        + " : "
                                        + old_song.artist
@@ -53,7 +53,7 @@ def compare(path, old_playlists, new_playlists):
                             if new_song.identifier != old_song.identifier and \
                                new_song.title == old_song.title and \
                                new_song.artist == old_song.artist:
-                                file.write("\t* "
+                                file.write("\t\t* "
                                            + new_song.title
                                            + " : "
                                            + new_song.artist
@@ -65,7 +65,7 @@ def compare(path, old_playlists, new_playlists):
                                (new_song.title == old_song.title and new_song.artist == old_song.artist):
                                 break
                         else:
-                            file.write("\t+ "
+                            file.write("\t\t+ "
                                        + new_song.title
                                        + " : "
                                        + new_song.artist
@@ -78,7 +78,7 @@ def compare(path, old_playlists, new_playlists):
         file.write("\r\n")
 
         for new_playlist in new_playlists:
-            file.write(new_playlist.name + "\r\n")
+            file.write("\t" + new_playlist.name + "\r\n")
             file.write("\r\n")
             skip = []
             count1 = 0
@@ -90,7 +90,7 @@ def compare(path, old_playlists, new_playlists):
                             (new_song1.title == new_song2.title and new_song1.artist == new_song2.artist)):
                         skip.append(count1)
                         skip.append(count2)
-                        file.write("\t"
+                        file.write("\t\t"
                                    + new_song1.title
                                    + " : "
                                    + new_song1.artist
@@ -106,7 +106,7 @@ def compare(path, old_playlists, new_playlists):
 
         for parent_playlist in new_playlists:
             if "/" not in parent_playlist.name:
-                file.write(parent_playlist.name + "\r\n")
+                file.write("\t" + parent_playlist.name + "\r\n")
                 file.write("\r\n")
                 parent_song_found = []
                 has_child = False
@@ -123,7 +123,7 @@ def compare(path, old_playlists, new_playlists):
                                     break
                                 parent_count = parent_count + 1
                             else:
-                                file.write("\t- "
+                                file.write("\t\t- "
                                            + child_song.title
                                            + " : "
                                            + child_song.artist
@@ -134,7 +134,7 @@ def compare(path, old_playlists, new_playlists):
                     parent_count = 0
                     for parent_song in parent_playlist.songs:
                         if parent_count not in parent_song_found:
-                            file.write("\t+ "
+                            file.write("\t\t+ "
                                        + parent_song.title
                                        + " : "
                                        + parent_song.artist
