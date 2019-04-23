@@ -144,4 +144,12 @@ def compare(path, old_playlists, new_playlists):
                         parent_count = parent_count + 1
                 file.write("\r\n")
 
+        file.write("######\r\n")
+        file.write("Counts\r\n")
+        file.write("######\r\n")
+        file.write("\r\n")
+
+        for new_playlist in new_playlists:
+            file.write("\t" + new_playlist.name + ": " + str(len(new_playlist.songs)) + "\r\n")
+
     return
