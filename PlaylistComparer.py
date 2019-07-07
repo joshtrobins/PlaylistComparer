@@ -111,9 +111,7 @@ def compare(path, old_playlists, new_playlists):
                 parent_song_found = []
                 has_child = False
                 for child_playlist in new_playlists:
-                    if parent_playlist.name != child_playlist.name and \
-                       ((parent_playlist.name == "All" and "/" not in child_playlist.name) or
-                            (parent_playlist.name != "All" and child_playlist.name.startswith(parent_playlist.name))):
+                    if parent_playlist.name != child_playlist.name and child_playlist.name.startswith(parent_playlist.name):
                         has_child = True
                         for child_song in child_playlist.songs:
                             parent_count = 0
@@ -149,7 +147,14 @@ def compare(path, old_playlists, new_playlists):
         file.write("######\r\n")
         file.write("\r\n")
 
+        library_count = 0
         for new_playlist in new_playlists:
-            file.write("\t" + new_playlist.name + ": " + str(len(new_playlist.songs)) + "\r\n")
+            playlist_count = len(new_playlist.songs)
+            file.write("\t" + new_playlist.name + ": " + str(playlist_count) + "\r\n")
+            if "/" not in new_playlist.name:
+                library_count += playlist_count
+
+        file.write("\r\n")
+        file.write("\tLibrary: " + str(library_count) + "\r\n")
 
     return
