@@ -4,7 +4,7 @@ from Playlist import Playlist
 
 
 # https://unofficial-google-music-api.readthedocs.io/en/latest/reference/mobileclient.html
-def scrape(username, password):
+def scrape(username, password, process_library):
     client = gmusicapi.Mobileclient()
     client.login(username, password, gmusicapi.Mobileclient.FROM_MAC_ADDRESS)
 
@@ -33,6 +33,17 @@ def scrape(username, password):
                         break
                 else:
                     raise LookupError("Couldn't find ID in song list.")
+
+        playlists.append(playlist)
+
+    if process_library:
+        playlist = Playlist("Library")
+        for generated_song in generated_songs:
+            playlist.songs.append(Song(
+                generated_song["title"],
+                generated_song["artist"],
+                generated_song["album"],
+                generated_song["id"]))
 
         playlists.append(playlist)
 

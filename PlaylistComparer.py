@@ -1,5 +1,6 @@
 import datetime
 import os.path
+import re
 
 
 def compare(path, old_playlists, new_playlists):
@@ -32,45 +33,48 @@ def compare(path, old_playlists, new_playlists):
         file.write("\r\n")
 
         for new_playlist in new_playlists:
-            file.write("\t" + new_playlist.name + "\r\n")
-            file.write("\r\n")
-            for old_playlist in old_playlists:
-                if new_playlist.name == old_playlist.name:
-                    for old_song in old_playlist.songs:
-                        for new_song in new_playlist.songs:
-                            if new_song.identifier == old_song.identifier or \
-                               (new_song.title == old_song.title and new_song.artist == old_song.artist):
-                                break
-                        else:
-                            file.write("\t\t- "
-                                       + old_song.title
-                                       + " : "
-                                       + old_song.artist
-                                       + "\r\n")
+            if new_playlist.name.startswith("/") or ("/" not in new_playlist.name and new_playlist.name != "Library"):
+                file.write("\t" + new_playlist.name + "\r\n")
+                file.write("\r\n")
+                for old_playlist in old_playlists:
+                    if new_playlist.name == old_playlist.name:
+                        for old_song in old_playlist.songs:
+                            for new_song in new_playlist.songs:
+                                if new_song.identifier == old_song.identifier or \
+                                        (fix_song_title(new_song.title) == fix_song_title(old_song.title) and
+                                         new_song.artist == old_song.artist):
+                                    break
+                            else:
+                                file.write("\t\t- "
+                                           + old_song.title
+                                           + " : "
+                                           + old_song.artist
+                                           + "\r\n")
 
-                    for old_song in old_playlist.songs:
+                        for old_song in old_playlist.songs:
+                            for new_song in new_playlist.songs:
+                                if new_song.identifier != old_song.identifier and \
+                                        fix_song_title(new_song.title) == fix_song_title(old_song.title) and \
+                                        new_song.artist == old_song.artist:
+                                    file.write("\t\t* "
+                                               + new_song.title
+                                               + " : "
+                                               + new_song.artist
+                                               + "\r\n")
+
                         for new_song in new_playlist.songs:
-                            if new_song.identifier != old_song.identifier and \
-                               new_song.title == old_song.title and \
-                               new_song.artist == old_song.artist:
-                                file.write("\t\t* "
+                            for old_song in old_playlist.songs:
+                                if new_song.identifier == old_song.identifier or \
+                                        (fix_song_title(new_song.title) == fix_song_title(old_song.title) and
+                                         new_song.artist == old_song.artist):
+                                    break
+                            else:
+                                file.write("\t\t+ "
                                            + new_song.title
                                            + " : "
                                            + new_song.artist
                                            + "\r\n")
-
-                    for new_song in new_playlist.songs:
-                        for old_song in old_playlist.songs:
-                            if new_song.identifier == old_song.identifier or \
-                               (new_song.title == old_song.title and new_song.artist == old_song.artist):
-                                break
-                        else:
-                            file.write("\t\t+ "
-                                       + new_song.title
-                                       + " : "
-                                       + new_song.artist
-                                       + "\r\n")
-            file.write("\r\n")
+                file.write("\r\n")
 
         file.write("##########\r\n")
         file.write("Duplicates\r\n")
@@ -86,8 +90,9 @@ def compare(path, old_playlists, new_playlists):
                 count2 = 0
                 for new_song2 in new_playlist.songs:
                     if count1 not in skip and count2 not in skip and count1 != count2 and \
-                       (new_song1.identifier == new_song2.identifier or
-                            (new_song1.title == new_song2.title and new_song1.artist == new_song2.artist)):
+                            (new_song1.identifier == new_song2.identifier or
+                             (fix_song_title(new_song1.title) == fix_song_title(new_song2.title) and
+                              new_song1.artist == new_song2.artist)):
                         skip.append(count1)
                         skip.append(count2)
                         file.write("\t\t"
@@ -111,12 +116,17 @@ def compare(path, old_playlists, new_playlists):
                 parent_song_found = []
                 has_child = False
                 for child_playlist in new_playlists:
-                    if parent_playlist.name != child_playlist.name and child_playlist.name.startswith(parent_playlist.name):
+                    if parent_playlist.name != child_playlist.name and \
+                        ((parent_playlist.name == "Library" and "/" not in child_playlist.name) or
+                         (parent_playlist.name != "Library" and child_playlist.name.startswith(parent_playlist.name))):
                         has_child = True
                         for child_song in child_playlist.songs:
                             parent_count = 0
                             for parent_song in parent_playlist.songs:
-                                if child_song.identifier == parent_song.identifier:
+                                if child_song.identifier == parent_song.identifier or \
+                                        (child_song.title == parent_song.title and
+                                         child_song.artist == parent_song.artist and
+                                         child_song.album == parent_song.album):
                                     parent_song_found.append(parent_count)
                                     break
                                 parent_count = parent_count + 1
@@ -151,10 +161,20 @@ def compare(path, old_playlists, new_playlists):
         for new_playlist in new_playlists:
             playlist_count = len(new_playlist.songs)
             file.write("\t" + new_playlist.name + ": " + str(playlist_count) + "\r\n")
-            if "/" not in new_playlist.name:
+            if "/" not in new_playlist.name and new_playlist.name != "Library":
                 library_count += playlist_count
 
         file.write("\r\n")
-        file.write("\tLibrary: " + str(library_count) + "\r\n")
+        file.write("\tLibrary Estimate: " + str(library_count) + "\r\n")
 
     return
+
+
+def fix_song_title(string):
+    starts_exceptions = ("Main Theme", "Fall", "Spring", "Summer", "Winter", "Meyerbeer: Les Huguenots",
+                         "Wagner: Der fliegende Hollander", "Bizet: Carmen")
+    contains_exceptions = ("Reprise", "Finale", "Part", "Prologue")
+    if string.startswith(starts_exceptions) or any(s in string for s in contains_exceptions):
+        return string.strip().lower()
+
+    return re.sub(r"[\[(].*[\])]", "", string).strip().lower()
