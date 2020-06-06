@@ -1,12 +1,14 @@
 import gmusicapi
+from gmusicapi import Mobileclient
 from Song import Song
 from Playlist import Playlist
 
 
 # https://unofficial-google-music-api.readthedocs.io/en/latest/reference/mobileclient.html
-def scrape(username, password, process_library):
+def scrape(process_library):
     client = gmusicapi.Mobileclient()
-    client.login(username, password, gmusicapi.Mobileclient.FROM_MAC_ADDRESS)
+    credentials = client.perform_oauth(None, True)
+    client.oauth_login(Mobileclient.FROM_MAC_ADDRESS, credentials)
 
     playlists = []
     generated_songs = client.get_all_songs()
