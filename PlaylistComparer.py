@@ -33,7 +33,7 @@ def compare(path, old_playlists, new_playlists):
         file.write("\r\n")
 
         for new_playlist in new_playlists:
-            if new_playlist.name.startswith("/") or ("/" not in new_playlist.name and new_playlist.name != "Library"):
+            if new_playlist.name.startswith("/") or ("/" not in new_playlist.name and new_playlist.name != "All"):
                 file.write("\t" + new_playlist.name + "\r\n")
                 file.write("\r\n")
                 for old_playlist in old_playlists:
@@ -117,8 +117,8 @@ def compare(path, old_playlists, new_playlists):
                 has_child = False
                 for child_playlist in new_playlists:
                     if parent_playlist.name != child_playlist.name and \
-                        ((parent_playlist.name == "Library" and "/" not in child_playlist.name) or
-                         (parent_playlist.name != "Library" and child_playlist.name.startswith(parent_playlist.name))):
+                        ((parent_playlist.name == "All" and "/" not in child_playlist.name) or
+                         (parent_playlist.name != "All" and child_playlist.name.startswith(parent_playlist.name))):
                         has_child = True
                         for child_song in child_playlist.songs:
                             parent_count = 0
@@ -152,29 +152,13 @@ def compare(path, old_playlists, new_playlists):
                         parent_count = parent_count + 1
                 file.write("\r\n")
 
-        file.write("######\r\n")
-        file.write("Counts\r\n")
-        file.write("######\r\n")
-        file.write("\r\n")
-
-        library_count = 0
-        for new_playlist in new_playlists:
-            playlist_count = len(new_playlist.songs)
-            file.write("\t" + new_playlist.name + ": " + str(playlist_count) + "\r\n")
-            if "/" not in new_playlist.name and new_playlist.name != "Library":
-                library_count += playlist_count
-
-        file.write("\r\n")
-        file.write("\tLibrary Estimate: " + str(library_count) + "\r\n")
-
     return
 
 
 def fix_song_title(string):
-    starts_exceptions = ("Main Theme", "Fall", "Spring", "Summer", "Winter", "Meyerbeer: Les Huguenots",
-                         "Wagner: Der fliegende Hollander", "Bizet: Carmen")
+    starts_exceptions = ("Main Theme", "Fall", "Spring", "Summer", "Winter")
     contains_exceptions = ("Reprise", "Finale", "Part", "Prologue")
     if string.startswith(starts_exceptions) or any(s in string for s in contains_exceptions):
         return string.strip().lower()
 
-    return re.sub(r"[\[(].*[\])]", "", string).strip().lower()
+    return re.sub(r"[\[(].*[])]", "", string).strip().lower()
