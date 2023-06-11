@@ -7,35 +7,35 @@ def compare(path, old_playlists, new_playlists):
     path = os.path.join(path, "playlists_archive_" + datetime.date.today().strftime("%m%d%Y") + "_analysis.txt")
     with open(path, "w", encoding="utf-8", newline="") as file:
 
-        file.write("#########\r\n")
-        file.write("Playlists\r\n")
-        file.write("#########\r\n")
-        file.write("\r\n")
+        file.write("#########\n")
+        file.write("Playlists\n")
+        file.write("#########\n")
+        file.write("\n")
 
         for old_playlist in old_playlists:
             for new_playlist in new_playlists:
                 if new_playlist.name == old_playlist.name:
                     break
             else:
-                file.write("\t- " + old_playlist.name + "\r\n")
+                file.write("\t- " + old_playlist.name + "\n")
 
         for new_playlist in new_playlists:
             for old_playlist in old_playlists:
                 if new_playlist.name == old_playlist.name:
                     break
             else:
-                file.write("\t+ " + new_playlist.name + "\r\n")
+                file.write("\t+ " + new_playlist.name + "\n")
 
-        file.write("\r\n")
-        file.write("#####\r\n")
-        file.write("Songs\r\n")
-        file.write("#####\r\n")
-        file.write("\r\n")
+        file.write("\n")
+        file.write("#####\n")
+        file.write("Songs\n")
+        file.write("#####\n")
+        file.write("\n")
 
         for new_playlist in new_playlists:
             if new_playlist.name.startswith("/") or ("/" not in new_playlist.name and new_playlist.name != "All"):
-                file.write("\t" + new_playlist.name + "\r\n")
-                file.write("\r\n")
+                file.write("\t" + new_playlist.name + "\n")
+                file.write("\n")
                 for old_playlist in old_playlists:
                     if new_playlist.name == old_playlist.name:
                         for old_song in old_playlist.songs:
@@ -49,7 +49,7 @@ def compare(path, old_playlists, new_playlists):
                                            + old_song.title
                                            + " : "
                                            + old_song.artist
-                                           + "\r\n")
+                                           + "\n")
 
                         for old_song in old_playlist.songs:
                             for new_song in new_playlist.songs:
@@ -60,7 +60,7 @@ def compare(path, old_playlists, new_playlists):
                                                + new_song.title
                                                + " : "
                                                + new_song.artist
-                                               + "\r\n")
+                                               + "\n")
 
                         for new_song in new_playlist.songs:
                             for old_song in old_playlist.songs:
@@ -73,17 +73,17 @@ def compare(path, old_playlists, new_playlists):
                                            + new_song.title
                                            + " : "
                                            + new_song.artist
-                                           + "\r\n")
-                file.write("\r\n")
+                                           + "\n")
+                file.write("\n")
 
-        file.write("##########\r\n")
-        file.write("Duplicates\r\n")
-        file.write("##########\r\n")
-        file.write("\r\n")
+        file.write("##########\n")
+        file.write("Duplicates\n")
+        file.write("##########\n")
+        file.write("\n")
 
         for new_playlist in new_playlists:
-            file.write("\t" + new_playlist.name + "\r\n")
-            file.write("\r\n")
+            file.write("\t" + new_playlist.name + "\n")
+            file.write("\n")
             skip = []
             count1 = 0
             for new_song1 in new_playlist.songs:
@@ -99,20 +99,20 @@ def compare(path, old_playlists, new_playlists):
                                    + new_song1.title
                                    + " : "
                                    + new_song1.artist
-                                   + "\r\n")
+                                   + "\n")
                     count2 = count2 + 1
                 count1 = count1 + 1
-            file.write("\r\n")
+            file.write("\n")
 
-        file.write("#########\r\n")
-        file.write("Hierarchy\r\n")
-        file.write("#########\r\n")
-        file.write("\r\n")
+        file.write("#########\n")
+        file.write("Hierarchy\n")
+        file.write("#########\n")
+        file.write("\n")
 
         for parent_playlist in new_playlists:
             if "/" not in parent_playlist.name:
-                file.write("\t" + parent_playlist.name + "\r\n")
-                file.write("\r\n")
+                file.write("\t" + parent_playlist.name + "\n")
+                file.write("\n")
                 parent_song_found = []
                 has_child = False
                 for child_playlist in new_playlists:
@@ -137,7 +137,7 @@ def compare(path, old_playlists, new_playlists):
                                            + child_song.artist
                                            + " : "
                                            + child_playlist.name
-                                           + "\r\n")
+                                           + "\n")
                 if has_child:
                     parent_count = 0
                     for parent_song in parent_playlist.songs:
@@ -148,9 +148,29 @@ def compare(path, old_playlists, new_playlists):
                                        + parent_song.artist
                                        + " : "
                                        + parent_playlist.name
-                                       + "\r\n")
+                                       + "\n")
                         parent_count = parent_count + 1
-                file.write("\r\n")
+                file.write("\n")
+
+        file.write("##########\n")
+        file.write("Unplayable\n")
+        file.write("##########\n")
+        file.write("\n")
+
+        for new_playlist in new_playlists:
+            if new_playlist.name.startswith("/") or ("/" not in new_playlist.name and new_playlist.name != "All"):
+                file.write("\t" + new_playlist.name + "\n")
+                file.write("\n")
+                for new_song in new_playlist.songs:
+                    if not new_song.playable or new_song.local:
+                        file.write("\t\t"
+                                   + new_song.title
+                                   + " : "
+                                   + new_song.artist
+                                   + " : "
+                                   + ("unplayable" if not new_song.playable else "local")
+                                   + "\n")
+                file.write("\n")
 
     return
 

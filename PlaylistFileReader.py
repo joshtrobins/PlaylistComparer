@@ -14,9 +14,17 @@ def read(path):
                 artist_index = row.index("artist")
                 album_index = row.index("album")
                 id_index = row.index("id")
+                playable_index = row.index("playable")
+                local_index = row.index("local")
                 playlist_index = row.index("playlist")
             else:
-                song = Song(row[title_index], row[artist_index], row[album_index], row[id_index])
+                song = Song(
+                    row[title_index],
+                    row[artist_index],
+                    row[album_index],
+                    row[id_index],
+                    row[playable_index],
+                    row[local_index])
                 playlist_name = row[playlist_index]
 
                 for playlist in playlists:

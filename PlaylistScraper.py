@@ -14,20 +14,26 @@ def scrape(client_id, client_secret, username):
         playlist = Playlist(generated_playlist["name"])
         offset = 0
         while True:
-            generated_tracks_container = client.playlist_items(generated_playlist["id"], offset=offset)
+            generated_tracks_container = client.playlist_items(
+                generated_playlist["id"],
+                offset=offset,
+                market="US")
             generated_tracks = generated_tracks_container["items"]
             generated_tracks_count = len(generated_tracks)
             if len(generated_tracks) == 0:
                 break
             for generated_track_container in generated_tracks:
                 generated_track = generated_track_container["track"]
+
                 generated_track_id = generated_track["uri"] if generated_track["id"] is None else generated_track["id"]
                 playlist.songs.append(
                     Song(
                         generated_track["name"],
                         generated_track["artists"][0]["name"],
                         generated_track["album"]["name"],
-                        generated_track_id))
+                        generated_track_id,
+                        generated_track["is_playable"] if "is_playable" in generated_track else True,
+                        generated_track["is_local"]))
             offset = offset + generated_tracks_count
         playlists.append(playlist)
 
